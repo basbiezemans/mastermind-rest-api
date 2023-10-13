@@ -22,11 +22,18 @@ type game struct {
 	CodeBreakerScore uint32    `json:"breaker_score"`
 }
 
-var games = []game{
-	{Token: uuid.New(), CreatedOn: time.Now(), CodeMakerScore: 0, CodeBreakerScore: 1},
-}
+var games map[uuid.UUID]game
 
 func main() {
+	// TEST GAME
+	token := uuid.New()
+	games[token] = game{
+		Token:            token,
+		CreatedOn:        time.Now(),
+		CodeMakerScore:   0,
+		CodeBreakerScore: 1,
+	}
+
 	router := gin.Default()
 	router.POST("/create", newGame)
 	router.GET("/games", getGames)
@@ -44,7 +51,7 @@ func newGame(c *gin.Context) {
 		CodeMakerScore:   0,
 		CodeBreakerScore: 0,
 	}
-	games = append(games, game)
+	games[game.Token] = game
 	c.IndentedJSON(http.StatusCreated, game)
 }
 
@@ -59,11 +66,9 @@ func getGames(c *gin.Context) {
 func getGameByToken(c *gin.Context) {
 	token := c.Param("token")
 	if token, err := uuid.Parse(token); err == nil {
-		for _, game := range games {
-			if game.Token == token {
-				c.IndentedJSON(http.StatusOK, game)
-				return
-			}
+		if game, ok := games[token]; ok {
+			c.IndentedJSON(http.StatusOK, game)
+			return
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
@@ -76,16 +81,14 @@ func updateGameByToken(c *gin.Context) {
 	token := c.Param("token")
 	guess := c.Param("guess")
 	if token, err := uuid.Parse(token); err == nil {
-		for _, game := range games {
-			if game.Token == token {
-				feedback, err := update(game, guess)
-				if err != nil {
-					c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-				} else {
-					c.IndentedJSON(http.StatusOK, feedback)
-				}
-				return
+		if game, ok := games[token]; ok {
+			feedback, err := update(game, guess)
+			if err != nil {
+				c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+			} else {
+				c.IndentedJSON(http.StatusOK, feedback)
 			}
+			return
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
@@ -97,12 +100,10 @@ func updateGameByToken(c *gin.Context) {
 func deleteGameByToken(c *gin.Context) {
 	token := c.Param("token")
 	if token, err := uuid.Parse(token); err == nil {
-		for i, game := range games {
-			if game.Token == token {
-				games = append(games[:i], games[i+1:]...)
-				c.IndentedJSON(http.StatusNoContent, nil)
-				return
-			}
+		if _, ok := games[token]; ok {
+			delete(games, token)
+			c.IndentedJSON(http.StatusNoContent, nil)
+			return
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
@@ -111,7 +112,7 @@ func deleteGameByToken(c *gin.Context) {
 // Update stub
 func update(game game, guess string) (result, error) {
 	return result{
-		Token:    games[0].Token,
+		Token:    game.Token,
 		Message:  "Guess 1 of 10. You guessed: [1,2,3,4]",
 		Feedback: "1,0",
 	}, nil
