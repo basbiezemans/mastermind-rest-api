@@ -10,9 +10,9 @@ import (
 )
 
 type result struct {
-	Token    uuid.UUID
-	Message  string
-	Feedback string
+	Token    uuid.UUID `json:"token"`
+	Message  string    `json:"message"`
+	Feedback string    `json:"feedback"`
 }
 
 type game struct {
