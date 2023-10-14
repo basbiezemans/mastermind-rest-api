@@ -2,60 +2,47 @@ package main
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
+
+	mdl "mastermind/web-service/model"
 )
 
-type result struct {
-	Token    uuid.UUID `json:"token"`
-	Message  string    `json:"message"`
-	Feedback string    `json:"feedback"`
-}
-
-type game struct {
-	Token            uuid.UUID `json:"token"`
-	CreatedOn        time.Time `json:"created_on"`
-	CodeMakerScore   uint32    `json:"maker_score"`
-	CodeBreakerScore uint32    `json:"breaker_score"`
-}
-
-var games map[uuid.UUID]game
+// Non-persistent storage for now
+var games = map[uuid.UUID]mdl.Game{}
 
 func main() {
-	// TEST GAME
-	token := uuid.New()
-	games[token] = game{
-		Token:            token,
-		CreatedOn:        time.Now(),
-		CodeMakerScore:   0,
-		CodeBreakerScore: 1,
-	}
+	//- TEST GAME -------------------------
+	game := mdl.NewGame()
+	test, _ := uuid.Parse("618c3faa-b7ff-4aa9-a618-48a6b88ed0f7")
+	games[test] = game
+	//- TEST GAME -------------------------
 
 	router := gin.Default()
-	router.POST("/create", newGame)
+
+	// TEST FEATURE
 	router.GET("/games", getGames)
+
+	router.POST("/create", newGame)
 	router.GET("/games/:token", getGameByToken)
 	router.PATCH("/games/:token", updateGameByToken)
 	router.DELETE("/games/:token", deleteGameByToken)
 	router.Run("localhost:8080")
 }
 
-// Create a new game and return that game as a response.
+// Create a new game and return a confirmation as response.
 func newGame(c *gin.Context) {
-	var game = game{
-		Token:            uuid.New(),
-		CreatedOn:        time.Now(),
-		CodeMakerScore:   0,
-		CodeBreakerScore: 0,
-	}
+	game := mdl.NewGame()
 	games[game.Token] = game
-	c.IndentedJSON(http.StatusCreated, game)
+	c.IndentedJSON(http.StatusCreated, gin.H{
+		"message": "A new game has been created. Good luck!",
+		"token":   game.Token.String(),
+	})
 }
 
-// Responds with a list of all games.
+// TEST FEATURE
 func getGames(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, games)
 }
@@ -64,56 +51,55 @@ func getGames(c *gin.Context) {
 // parameter sent by the client, then return that game
 // as a response.
 func getGameByToken(c *gin.Context) {
-	token := c.Param("token")
-	if token, err := uuid.Parse(token); err == nil {
-		if game, ok := games[token]; ok {
-			c.IndentedJSON(http.StatusOK, game)
-			return
-		}
+	token, err := uuid.Parse(c.Param("token"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
+		return
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
-}
-
-// Locate a game whose Token value matches the token
-// parameter sent by the client, then update that game
-// and return feedback as a response.
-func updateGameByToken(c *gin.Context) {
-	token := c.Param("token")
-	guess := c.Param("guess")
-	if token, err := uuid.Parse(token); err == nil {
-		if game, ok := games[token]; ok {
-			feedback, err := update(game, guess)
-			if err != nil {
-				c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
-			} else {
-				c.IndentedJSON(http.StatusOK, feedback)
-			}
-			return
-		}
+	game, ok := games[token]
+	if !ok {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
+		return
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
+	c.IndentedJSON(http.StatusOK, game)
 }
 
 // Locate a game whose Token value matches the token
 // parameter sent by the client, then delete the game
 // but don't return any content.
 func deleteGameByToken(c *gin.Context) {
-	token := c.Param("token")
-	if token, err := uuid.Parse(token); err == nil {
-		if _, ok := games[token]; ok {
-			delete(games, token)
-			c.IndentedJSON(http.StatusNoContent, nil)
-			return
-		}
+	token, err := uuid.Parse(c.Param("token"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
+		return
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
+	delete(games, token)
+	c.IndentedJSON(http.StatusNoContent, nil)
 }
 
-// Update stub
-func update(game game, guess string) (result, error) {
-	return result{
-		Token:    game.Token,
-		Message:  "Guess 1 of 10. You guessed: [1,2,3,4]",
-		Feedback: "1,0",
-	}, nil
+// Locate a game whose Token value matches the token
+// parameter sent by the client, then update that game
+// and return feedback as a response.
+func updateGameByToken(c *gin.Context) {
+	token, err := uuid.Parse(c.Param("token"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
+		return
+	}
+	guess, ok := c.GetPostForm("guess")
+	if !ok {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
+		return
+	}
+	game, ok := games[token]
+	if !ok {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
+		return
+	}
+	feedback, err := game.Update(guess)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, feedback)
 }
