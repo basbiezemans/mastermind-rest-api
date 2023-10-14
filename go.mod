@@ -1,4 +1,4 @@
-module github.com/basbiezemans/mastermind-go-api
+module mastermind/web-service
 
 go 1.21.1
 
