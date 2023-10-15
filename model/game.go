@@ -35,6 +35,16 @@ func NewGame() Game {
 	}
 }
 
+func MockGame(token uuid.UUID) Game {
+	return Game{
+		Token:     token,
+		CreatedOn: time.Now(),
+		Turn:      1,
+		Score:     Score{0, 0},
+		Secret:    NewSecret(),
+	}
+}
+
 func NewScore() Score {
 	return Score{
 		CodeMaker:   0,

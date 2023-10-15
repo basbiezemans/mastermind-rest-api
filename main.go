@@ -14,22 +14,29 @@ import (
 var games = map[uuid.UUID]mdl.Game{}
 
 func main() {
-	//- TEST GAME -------------------------
-	game := mdl.NewGame()
-	test, _ := uuid.Parse("618c3faa-b7ff-4aa9-a618-48a6b88ed0f7")
-	games[test] = game
-	//- TEST GAME -------------------------
+	router := newRouter()
+	router.Run(":8080")
+}
 
+// For testing purposes only.
+func addMockGames() {
+	tokens := []string{
+		"0fd253d0-80dc-42e8-aa0c-b1e9ce84936d",
+		"20d245fd-f724-4e1c-a818-04b3dd33ef5d",
+	}
+	for _, token := range tokens {
+		game := mdl.MockGame(uuid.MustParse(token))
+		games[game.Token] = game
+	}
+}
+
+func newRouter() *gin.Engine {
 	router := gin.Default()
-
-	// TEST FEATURE
-	router.GET("/games", getGames)
-
 	router.POST("/create", newGame)
 	router.GET("/games/:token", getGameByToken)
 	router.PATCH("/games/:token", updateGameByToken)
 	router.DELETE("/games/:token", deleteGameByToken)
-	router.Run("localhost:8080")
+	return router
 }
 
 // Create a new game and return a confirmation as response.
@@ -40,11 +47,6 @@ func newGame(c *gin.Context) {
 		"message": "A new game has been created. Good luck!",
 		"token":   game.Token.String(),
 	})
-}
-
-// TEST FEATURE
-func getGames(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, games)
 }
 
 // Locate a game whose Token value matches the token
