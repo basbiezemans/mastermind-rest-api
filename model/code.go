@@ -42,13 +42,7 @@ func newCode(code string) Code {
 
 func isValidDigit(r rune) bool {
 	var valid = []rune("123456")
-	return unicode.IsDigit(r) && slice.Any(equals(r), valid)
-}
-
-func equals(r rune) func(rune) bool {
-	return func(e rune) bool {
-		return r == e
-	}
+	return unicode.IsDigit(r) && slice.Any(IsEqual(r), valid)
 }
 
 func CodeFromString(guess string) (Code, error) {
