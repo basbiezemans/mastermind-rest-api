@@ -1,16 +1,20 @@
 package model
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
+
+	slice "github.com/basbiezemans/gofunctools/functools"
 )
 
 type Game struct {
-	Token     uuid.UUID `json:"token"`
 	CreatedOn time.Time `json:"created_on"`
-	Turn      uint8     `json:"-"`
+	Token     uuid.UUID `json:"token"`
 	Score     Score     `json:"score"`
+	Turn      uint8     `json:"-"`
 	Secret    Secret    `json:"-"`
 }
 
@@ -22,15 +26,26 @@ type Score struct {
 type Result struct {
 	Token    uuid.UUID `json:"token"`
 	Message  string    `json:"message"`
-	Feedback []int     `json:"feedback"`
+	Guess    string    `json:"guess"`
+	Feedback string    `json:"feedback"`
+}
+
+type Feedback struct {
+	Correct int
+	Present int
+}
+
+type NumPresent struct {
+	Tally  int
+	Digits []rune
 }
 
 func NewGame() Game {
 	return Game{
 		Token:     uuid.New(),
 		CreatedOn: time.Now(),
-		Turn:      1,
-		Score:     Score{0, 0},
+		Turn:      0,
+		Score:     NewScore(),
 		Secret:    NewSecret(),
 	}
 }
@@ -39,9 +54,9 @@ func MockGame(token uuid.UUID) Game {
 	return Game{
 		Token:     token,
 		CreatedOn: time.Now(),
-		Turn:      1,
-		Score:     Score{0, 0},
-		Secret:    NewSecret(),
+		Turn:      0,
+		Score:     NewScore(),
+		Secret:    Secret{Code: newCode("1234")},
 	}
 }
 
@@ -52,15 +67,73 @@ func NewScore() Score {
 	}
 }
 
-// Stub: update the game and return a result
-func (g Game) Update(guess string) (Result, error) {
+// Takes a secret code and a guess, and returns feedback that
+// shows how many digits are correct and/or present in the guess.
+func NewFeedback(secret Code, guess Code) Feedback {
+	var pairs = slice.ZipWith(NewPair, secret.Digits, guess.Digits)
+	return Feedback{
+		Correct: numCorrect(pairs),
+		Present: numPresent(Unequal(pairs)),
+	}
+}
+
+func numCorrect(pairs []Pair[rune]) int {
+	return len(pairs) - len(Unequal(pairs))
+}
+
+func count(np NumPresent, r rune) NumPresent {
+	if slice.Any(IsEqual(r), np.Digits) {
+		np.Tally += 1
+		np.Digits = Delete(r, np.Digits)
+		return np
+	}
+	return np
+}
+
+func numPresent(pairs []Pair[rune]) int {
+	secret, guess := slice.UnzipWith(Unpair, pairs)
+	return slice.FoldLeft(count, NumPresent{0, secret}, guess).Tally
+}
+
+func (f Feedback) String() string {
+	return strings.Repeat("●", f.Correct) + strings.Repeat("○", f.Present)
+}
+
+// Update the game and return a result
+func (g *Game) Update(guess string) (Result, error) {
 	code, err := CodeFromString(guess)
 	if err != nil {
 		return Result{}, err
 	}
+	feedback := NewFeedback(g.Secret.Code, code)
+	// Increment turn count
+	g.Turn += 1
+	// Award a point if applicable
+	isCorrectGuess := feedback.Correct == 4
+	isGameOver := g.Turn == 10
+	message := fmt.Sprintf("Guess %d of 10. You guessed: %s", g.Turn, guess)
+	format := "%s The current score is %d (You) vs %d (CodeMaker)."
+	if isCorrectGuess {
+		g.Score.CodeBreaker += 1
+		points := g.Score
+		message = fmt.Sprintf(format, "You won!", points.CodeBreaker, points.CodeMaker)
+		g.Reset()
+	} else if isGameOver {
+		g.Score.CodeMaker += 1
+		points := g.Score
+		message = fmt.Sprintf(format, "You lost.", points.CodeBreaker, points.CodeMaker)
+		g.Reset()
+	}
 	return Result{
-		Message:  "Guess 1 of 10. You guessed: " + code.String(),
+		Message:  message,
 		Token:    g.Token,
-		Feedback: []int{1, 0},
+		Guess:    guess,
+		Feedback: feedback.String(),
 	}, nil
+}
+
+// Reset the game
+func (g *Game) Reset() {
+	g.Turn = 0
+	g.Secret = NewSecret()
 }
