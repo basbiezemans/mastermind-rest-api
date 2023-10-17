@@ -82,9 +82,9 @@ func numCorrect(pairs []Pair[rune]) int {
 }
 
 func count(np NumPresent, r rune) NumPresent {
-	if slice.Any(IsEqual(r), np.Digits) {
+	if digits, ok := Remove(r, np.Digits); ok {
 		np.Tally += 1
-		np.Digits = Delete(r, np.Digits)
+		np.Digits = digits
 		return np
 	}
 	return np

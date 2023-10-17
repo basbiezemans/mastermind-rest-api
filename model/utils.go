@@ -46,10 +46,12 @@ func FindIndex[C comparable](fn func(C) bool, xs []C) (int, bool) {
 	return -1, false
 }
 
-// Delete x removes the first occurrence of x from its slice argument.
-func Delete[C comparable](x C, xs []C) []C {
-	if i, ok := FindIndex(IsEqual(x), xs); ok {
-		return append(xs[:i], xs[i+1:]...)
+// Removes the first occurrence of x from its slice argument, if it's present.
+func Remove[C comparable](x C, xs []C) ([]C, bool) {
+	for i, y := range xs {
+		if x == y {
+			return append(xs[:i], xs[i+1:]...), true
+		}
 	}
-	return xs
+	return xs, false
 }
