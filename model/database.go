@@ -8,7 +8,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	slice "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/functools"
 )
 
 type GameState struct {
@@ -41,22 +41,17 @@ func createGameStateIfNotExists(games []Game) {
 	if !db.Migrator().HasTable(GameState{}) {
 		db.AutoMigrate(GameState{})
 		if len(games) > 0 {
-			db.Create(slice.Map(Game.Convert, games))
+			db.Create(Map(Game.Convert, games))
 		}
 	}
 }
 
 func getMockGames() []Game {
-	games := []Game{}
 	tokens := []string{
 		"0fd253d0-80dc-42e8-aa0c-b1e9ce84936d",
 		"20d245fd-f724-4e1c-a818-04b3dd33ef5d",
 	}
-	for _, token := range tokens {
-		game := MockGame(uuid.MustParse(token))
-		games = append(games, game)
-	}
-	return games
+	return Map(Compose(MockGame, uuid.MustParse), tokens)
 }
 
 func (g Game) Convert() GameState {

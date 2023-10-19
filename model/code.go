@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"unicode"
 
-	slice "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/functools"
 )
 
 type Secret struct {
@@ -42,13 +42,13 @@ func newCode(code string) Code {
 
 func isValidDigit(r rune) bool {
 	var valid = []rune("123456")
-	return unicode.IsDigit(r) && slice.Any(IsEqual(r), valid)
+	return unicode.IsDigit(r) && Any(IsEqual(r), valid)
 }
 
 func CodeFromString(guess string) (Code, error) {
 	var chars = []rune(guess)
 	var isValidLen = len(chars) == 4
-	var isValidGuess = isValidLen && slice.All(isValidDigit, chars)
+	var isValidGuess = isValidLen && All(isValidDigit, chars)
 	if isValidGuess {
 		return newCode(guess), nil
 	}

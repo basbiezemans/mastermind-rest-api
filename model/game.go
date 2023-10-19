@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	slice "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/functools"
 )
 
 type Game struct {
@@ -70,7 +70,7 @@ func NewScore() Score {
 // Takes a secret code and a guess, and returns feedback that
 // shows how many digits are correct and/or present in the guess.
 func NewFeedback(secret Code, guess Code) Feedback {
-	var pairs = slice.ZipWith(NewPair, secret.Digits, guess.Digits)
+	var pairs = ZipWith(NewPair, secret.Digits, guess.Digits)
 	return Feedback{
 		Correct: numCorrect(pairs),
 		Present: numPresent(Unequal(pairs)),
@@ -91,8 +91,8 @@ func count(np NumPresent, r rune) NumPresent {
 }
 
 func numPresent(pairs []Pair[rune]) int {
-	secret, guess := slice.UnzipWith(Unpair, pairs)
-	return slice.FoldLeft(count, NumPresent{0, secret}, guess).Tally
+	secret, guess := UnzipWith(Unpair, pairs)
+	return FoldLeft(count, NumPresent{0, secret}, guess).Tally
 }
 
 func (f Feedback) String() string {
