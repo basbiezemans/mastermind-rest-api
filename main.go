@@ -14,7 +14,7 @@ import (
 func main() {
 	model.ConnectDatabase()
 	router := newRouter()
-	router.Run(":8080")
+	router.Run()
 }
 
 func newRouter() *gin.Engine {
