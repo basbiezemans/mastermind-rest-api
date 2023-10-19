@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"mastermind/web-service/model"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	addMockGames()
+	model.ConnectMockDatabase()
 }
 
 func TestCreateGame(t *testing.T) {

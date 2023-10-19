@@ -1,33 +1,20 @@
 package main
 
 import (
+	"fmt"
+	"mastermind/web-service/model"
 	"net/http"
+	"os"
 
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
-
-	mdl "mastermind/web-service/model"
 )
 
-// Non-persistent storage for now
-var games = map[uuid.UUID]mdl.Game{}
-
 func main() {
+	model.ConnectDatabase()
 	router := newRouter()
 	router.Run(":8080")
-}
-
-// For testing purposes only.
-func addMockGames() {
-	tokens := []string{
-		"0fd253d0-80dc-42e8-aa0c-b1e9ce84936d",
-		"20d245fd-f724-4e1c-a818-04b3dd33ef5d",
-	}
-	for _, token := range tokens {
-		game := mdl.MockGame(uuid.MustParse(token))
-		games[game.Token] = game
-	}
 }
 
 func newRouter() *gin.Engine {
@@ -41,8 +28,7 @@ func newRouter() *gin.Engine {
 
 // Create a new game and return a confirmation as response.
 func newGame(c *gin.Context) {
-	game := mdl.NewGame()
-	games[game.Token] = game
+	game := model.CreateGame()
 	c.IndentedJSON(http.StatusCreated, gin.H{
 		"message": "A new game has been created. Good luck!",
 		"token":   game.Token.String(),
@@ -58,8 +44,8 @@ func getGameByToken(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
 		return
 	}
-	game, ok := games[token]
-	if !ok {
+	game, err := model.GetGame(token)
+	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
 		return
 	}
@@ -75,7 +61,7 @@ func deleteGameByToken(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
 		return
 	}
-	delete(games, token)
+	model.DeleteGame(token)
 	c.IndentedJSON(http.StatusNoContent, nil)
 }
 
@@ -93,15 +79,20 @@ func updateGameByToken(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
 		return
 	}
-	game, ok := games[token]
-	if !ok {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
-		return
-	}
-	feedback, err := game.Update(guess)
+	feedback, err := model.UpdateGame(token, guess)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		go LogError(err.Error())
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "server error"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, feedback)
+}
+
+func LogError(message string) {
+	flags := os.O_APPEND | os.O_CREATE | os.O_WRONLY
+	fname := "data/error.log"
+	logfile, err := os.OpenFile(fname, flags, 0644)
+	if err == nil {
+		fmt.Fprintln(logfile, message)
+	}
 }
