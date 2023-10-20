@@ -40,6 +40,12 @@ type NumPresent struct {
 	Digits []rune
 }
 
+type GameInfo struct {
+	CreatedOn time.Time
+	Token     uuid.UUID
+	Score     Score
+}
+
 func NewGame() Game {
 	return Game{
 		Token:     uuid.New(),
@@ -136,4 +142,12 @@ func (g *Game) Update(guess string) (Result, error) {
 func (g *Game) Reset() {
 	g.Turn = 0
 	g.Secret = NewSecret()
+}
+
+func (g *Game) Info() GameInfo {
+	return GameInfo{
+		CreatedOn: g.CreatedOn,
+		Token:     g.Token,
+		Score:     g.Score,
+	}
 }

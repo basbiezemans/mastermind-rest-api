@@ -49,7 +49,7 @@ func getGameByToken(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "game not found"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, game)
+	c.IndentedJSON(http.StatusOK, game.Info())
 }
 
 // Locate a game whose Token value matches the token
