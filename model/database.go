@@ -3,10 +3,12 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"os"
 
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	. "github.com/basbiezemans/gofunctools/functools"
 )
@@ -24,7 +26,12 @@ func ConnectDatabase() {
 }
 
 func ConnectMockDatabase() {
-	db = connect("data/mock.db")
+	dirpath := "data"
+	_, err := os.Stat(dirpath)
+	if os.IsNotExist(err) {
+		dirpath = "../data"
+	}
+	db = connect(dirpath + "/mock.db")
 	createGameStateIfNotExists(getMockGames())
 }
 
@@ -36,13 +43,16 @@ func connect(dsn string) *gorm.DB {
 	return conn
 }
 
-// Create and pre-populate the database in case it doesn't exist.
+// Create a game_states table in case it doesn't exist.
+// Pre-populate the table if needed.
 func createGameStateIfNotExists(games []Game) {
 	if !db.Migrator().HasTable(GameState{}) {
 		db.AutoMigrate(GameState{})
-		if len(games) > 0 {
-			db.Create(Map(Game.Convert, games))
-		}
+	}
+	if len(games) > 0 {
+		db.Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).Create(Map(Game.Convert, games))
 	}
 }
 
