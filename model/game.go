@@ -41,9 +41,9 @@ type NumPresent struct {
 }
 
 type GameInfo struct {
-	CreatedOn time.Time
-	Token     uuid.UUID
-	Score     Score
+	CreatedOn time.Time `json:"created_on"`
+	Token     uuid.UUID `json:"token"`
+	Score     Score     `json:"score"`
 }
 
 func NewGame() Game {
