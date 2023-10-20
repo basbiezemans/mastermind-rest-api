@@ -38,11 +38,39 @@ func TestUpdateGameSuccess(t *testing.T) {
 	token := "0fd253d0-80dc-42e8-aa0c-b1e9ce84936d"
 	game, err := GetGame(uuid.MustParse(token))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	_, err = game.Update("1234")
+	_, err = UpdateGame(game.Token, "1234")
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestUpdateGameTurnCount(t *testing.T) {
+	token := "0fd253d0-80dc-42e8-aa0c-b1e9ce84936d"
+	game, err := GetGame(uuid.MustParse(token))
+	if err != nil {
+		t.Fatal(err)
+	}
+	turn := game.Turn
+	secret := game.Secret
+	var k, n uint8 = 0, 3
+	for k < n {
+		guess := NewSecret().Code.String()
+		if guess != secret.Code.String() {
+			_, err = UpdateGame(game.Token, guess)
+			if err != nil {
+				t.Fatal(err)
+			}
+			k += 1
+		}
+	}
+	game, err = GetGame(game.Token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if game.Turn != turn+n {
+		t.Errorf("expected a turn count of %d, got %d", turn+n, game.Turn)
 	}
 }
 
@@ -50,9 +78,9 @@ func TestUpdateGameFailure(t *testing.T) {
 	token := "0fd253d0-80dc-42e8-aa0c-b1e9ce84936d"
 	game, err := GetGame(uuid.MustParse(token))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	_, err = game.Update("")
+	_, err = UpdateGame(game.Token, "")
 	if err == nil {
 		t.Error("expected invalid guess error")
 	}

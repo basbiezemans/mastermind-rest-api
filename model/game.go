@@ -14,8 +14,8 @@ type Game struct {
 	CreatedOn time.Time `json:"created_on"`
 	Token     uuid.UUID `json:"token"`
 	Score     Score     `json:"score"`
-	Turn      uint8     `json:"-"`
-	Secret    Secret    `json:"-"`
+	Turn      uint8     `json:"game_turn"`
+	Secret    Secret    `json:"secret_code"`
 }
 
 type Score struct {
