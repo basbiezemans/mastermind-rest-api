@@ -20,5 +20,6 @@
 # Go workspace file
 go.work
 
-# Data folder for database and log files
-data/
+# All files in the data folder except README.md
+data/*
+!data/README.md
