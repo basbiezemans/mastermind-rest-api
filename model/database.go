@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	. "github.com/basbiezemans/gofunctools/functools"
 )
@@ -50,9 +49,8 @@ func createGameStateIfNotExists(games []Game) {
 		db.AutoMigrate(GameState{})
 	}
 	if len(games) > 0 {
-		db.Clauses(clause.OnConflict{
-			UpdateAll: true,
-		}).Create(Map(Game.Convert, games))
+		db.Exec("DELETE FROM game_states")
+		db.Create(Map(Game.Convert, games))
 	}
 }
 
