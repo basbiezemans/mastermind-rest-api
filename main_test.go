@@ -27,11 +27,11 @@ func TestCreateGame(t *testing.T) {
 	lookup := map[string]string{}
 	json.Unmarshal(rec.Body.Bytes(), &lookup)
 	if _, ok := lookup["token"]; !ok {
-		t.Errorf("missing JSON field: token")
+		t.Fatal("missing JSON field: token")
 	}
 	result, ok := lookup["message"]
 	if !ok {
-		t.Errorf("missing JSON field: message")
+		t.Fatal("missing JSON field: message")
 	}
 	expect := "A new game has been created. Good luck!"
 	assert.Equal(t, expect, result)
