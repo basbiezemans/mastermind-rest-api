@@ -24,14 +24,14 @@ func ConnectDatabase() {
 	createGameStateIfNotExists([]Game{})
 }
 
-func ConnectMockDatabase() {
+func ConnectTestDatabase() {
 	dirpath := "data"
 	_, err := os.Stat(dirpath)
 	if os.IsNotExist(err) {
 		dirpath = "../data"
 	}
-	db = connect(dirpath + "/mock.db")
-	createGameStateIfNotExists(getMockGames())
+	db = connect(dirpath + "/test.db")
+	createGameStateIfNotExists(getTestGames())
 }
 
 func connect(dsn string) *gorm.DB {
@@ -54,7 +54,7 @@ func createGameStateIfNotExists(games []Game) {
 	}
 }
 
-func getMockGames() []Game {
+func getTestGames() []Game {
 	tokens := []string{
 		"0fd253d0-80dc-42e8-aa0c-b1e9ce84936d",
 		"20d245fd-f724-4e1c-a818-04b3dd33ef5d",

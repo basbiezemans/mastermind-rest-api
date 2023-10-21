@@ -7,7 +7,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	ConnectMockDatabase()
+	ConnectTestDatabase()
 }
 
 func TestCreateGame(t *testing.T) {
