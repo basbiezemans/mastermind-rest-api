@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"mastermind/web-service/model"
 	"net/http"
 	"os"
@@ -81,18 +81,21 @@ func updateGameByToken(c *gin.Context) {
 	}
 	feedback, err := model.UpdateGame(token, guess)
 	if err != nil {
-		go LogError(err.Error())
+		go WriteToLog(err.Error(), "error")
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "server error"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, feedback)
 }
 
-func LogError(message string) {
+func WriteToLog(message, msgtype string) {
 	flags := os.O_APPEND | os.O_CREATE | os.O_WRONLY
-	fname := "data/error.log"
-	logfile, err := os.OpenFile(fname, flags, 0644)
-	if err == nil {
-		fmt.Fprintln(logfile, message)
+	fname := "data/" + msgtype + ".log"
+	file, err := os.OpenFile(fname, flags, 0644)
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer file.Close()
+	log.SetOutput(file)
+	log.Println(message)
 }
