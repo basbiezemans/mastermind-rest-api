@@ -9,11 +9,11 @@ import (
 )
 
 type Secret struct {
-	Code Code
+	Code Code `json:"code"`
 }
 
 type Code struct {
-	Digits []rune
+	Digits []rune `json:"digits"`
 }
 
 func (c Code) String() string {
