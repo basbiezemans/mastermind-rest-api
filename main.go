@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	model.ConnectDatabase()
 	router := newRouter()
 	router.Run()
@@ -20,6 +22,7 @@ func main() {
 func newRouter() *gin.Engine {
 	router := gin.Default()
 	router.POST("/create", newGame)
+	router.GET("/", getEndpointInfo)
 	router.GET("/games/:token", getGameByToken)
 	router.PATCH("/games/:token", updateGameByToken)
 	router.DELETE("/games/:token", deleteGameByToken)
@@ -32,6 +35,13 @@ func newGame(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{
 		"message": "A new game has been created. Good luck!",
 		"token":   game.Token.String(),
+	})
+}
+
+func getEndpointInfo(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"message": "This is the Mastermind code-breaking game.",
+		"version": "v0.1-" + gin.Mode(),
 	})
 }
 
