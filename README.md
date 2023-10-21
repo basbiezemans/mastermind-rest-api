@@ -6,5 +6,17 @@ REST API that simulates the role of Mastermind's codemaker.
 ## HTTP tests
 
 ```bash
-GIN_MODE=release go test -v
+GIN_MODE=test go test -v
+```
+
+## Module tests
+
+```bash
+go test ./...
+```
+
+## Start server
+
+```bash
+go run main.go
 ```
