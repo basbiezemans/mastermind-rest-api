@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"mastermind/web-service/model"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
@@ -94,31 +92,4 @@ func TestDeleteGameBadRequest(t *testing.T) {
 	router := newRouter()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
-}
-
-func TestWriteToLog(t *testing.T) {
-	message := "A test message"
-	testlog := "data/test.log"
-	WriteToLog(message, "test")
-	file, err := os.Open(testlog)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			t.Fatal(err)
-		}
-	}()
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-	if !scanner.Scan() {
-		t.Fatal("no file contents")
-	}
-	line := scanner.Text()
-	if !strings.HasSuffix(line, message) {
-		t.Errorf("expected [date time] %q, got %q", message, line)
-	}
-	if err := os.Remove(testlog); err != nil {
-		t.Fatal(err)
-	}
 }

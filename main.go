@@ -1,10 +1,12 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"io"
 	"mastermind/web-service/model"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -12,6 +14,7 @@ import (
 )
 
 func main() {
+	initErrorWriter()
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
 	model.ConnectDatabase()
@@ -91,21 +94,26 @@ func updateGameByToken(c *gin.Context) {
 	}
 	feedback, err := model.UpdateGame(token, guess)
 	if err != nil {
-		go WriteToLog(err.Error(), "error")
+		go logError(err.Error())
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "server error"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, feedback)
 }
 
-func WriteToLog(message, msgtype string) {
-	flags := os.O_APPEND | os.O_CREATE | os.O_WRONLY
-	fname := "data/" + msgtype + ".log"
-	file, err := os.OpenFile(fname, flags, 0644)
+func initErrorWriter() {
+	flags := os.O_CREATE | os.O_WRONLY | os.O_APPEND
+	file, err := os.OpenFile("data/error.log", flags, 0644)
 	if err != nil {
-		log.Fatal(err)
+		msg := "Failed to create error log file:"
+		os.Stderr.WriteString(fmt.Sprintln(msg, err))
+		return
 	}
-	defer file.Close()
-	log.SetOutput(file)
-	log.Println(message)
+	gin.DefaultErrorWriter = io.MultiWriter(file)
+}
+
+func logError(message string) {
+	t := time.Now()
+	message = fmt.Sprintf("%s | %s\n", t.Format(time.RFC3339), message)
+	gin.DefaultErrorWriter.Write([]byte(message))
 }
