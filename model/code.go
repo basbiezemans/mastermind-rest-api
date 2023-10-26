@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"unicode"
 
-	. "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/funcs"
 )
 
 type Secret struct {

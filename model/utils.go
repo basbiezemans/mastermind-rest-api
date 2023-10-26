@@ -34,18 +34,6 @@ func IsEqual[C comparable](a C) func(C) bool {
 	}
 }
 
-// FindIndex, takes a predicate and a slice and returns the index of the first
-// element in the slice satisfying the predicate (index,true), or (-1,false) if
-// there is no such element.
-func FindIndex[C comparable](fn func(C) bool, xs []C) (int, bool) {
-	for i, x := range xs {
-		if fn(x) {
-			return i, true
-		}
-	}
-	return -1, false
-}
-
 // Removes the first occurrence of x from its slice argument, if it's present.
 func Remove[C comparable](x C, xs []C) ([]C, bool) {
 	for i, y := range xs {

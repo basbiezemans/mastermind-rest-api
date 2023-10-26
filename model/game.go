@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	. "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/funcs"
 )
 
 type Game struct {

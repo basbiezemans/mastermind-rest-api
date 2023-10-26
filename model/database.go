@@ -9,7 +9,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	. "github.com/basbiezemans/gofunctools/functools"
+	. "github.com/basbiezemans/gofunctools/funcs"
 )
 
 type GameState struct {

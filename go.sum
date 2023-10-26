@@ -1,5 +1,7 @@
 github.com/basbiezemans/gofunctools v1.1.1 h1:dWfa8b8TdN7J06SIpGUXRtxXlbG0M9urpWthrAYAyYE=
 github.com/basbiezemans/gofunctools v1.1.1/go.mod h1:1RAY78qntz5koXpmmSf1LJ5lnRVxoOfg9qULsdhJ+yQ=
+github.com/basbiezemans/gofunctools v1.5.2 h1:+S0ZtA9ISgFIT3KkATy6OpxpsRci5L4IXYtIX94nYMM=
+github.com/basbiezemans/gofunctools v1.5.2/go.mod h1:iX69ju6UB3vZkoFk8kkUTGmi7Q5JT8GI5qurOxBLcbE=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
