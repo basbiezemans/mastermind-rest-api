@@ -91,7 +91,6 @@ func count(np NumPresent, r rune) NumPresent {
 	if digits, ok := Remove(r, np.Digits); ok {
 		np.Tally += 1
 		np.Digits = digits
-		return np
 	}
 	return np
 }
