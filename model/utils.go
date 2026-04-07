@@ -43,3 +43,15 @@ func Remove[C comparable](x C, xs []C) ([]C, bool) {
 	}
 	return xs, false
 }
+
+// MapMaybe applies a unary function, which can fail, to each element
+// of a slice, throws out any errors and returns the proper result values.
+func MapMaybe[A, B any](fn func(A) (B, error), xs []A) []B {
+	var ys = make([]B, 0)
+	for _, x := range xs {
+		if y, err := fn(x); err == nil {
+			ys = append(ys, y)
+		}
+	}
+	return ys
+}
