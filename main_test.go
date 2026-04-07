@@ -23,7 +23,10 @@ func TestCreateGame(t *testing.T) {
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusCreated, rec.Code)
 	lookup := map[string]string{}
-	json.Unmarshal(rec.Body.Bytes(), &lookup)
+	err := json.Unmarshal(rec.Body.Bytes(), &lookup)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	if _, ok := lookup["token"]; !ok {
 		t.Fatal("missing JSON field: token")
 	}

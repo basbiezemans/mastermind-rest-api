@@ -50,7 +50,7 @@ func createGameStateIfNotExists(games []Game) {
 	}
 	if len(games) > 0 {
 		db.Exec("DELETE FROM game_states")
-		db.Create(Map(Game.Marshal, games))
+		db.Create(MapMaybe(Game.Marshal, games))
 	}
 }
 
@@ -62,28 +62,32 @@ func getTestGames() []Game {
 	return Map(Compose(MockGame, uuid.MustParse), tokens)
 }
 
-func (g Game) Marshal() GameState {
+func (g Game) Marshal() (GameState, error) {
 	bytes, err := json.Marshal(g)
 	if err != nil {
-		return GameState{}
+		return GameState{}, err
 	}
-	return GameState{g.Token, bytes}
+	return GameState{g.Token, bytes}, nil
 }
 
-func (g GameState) Unmarshal() Game {
+func (g GameState) Unmarshal() (Game, error) {
 	bytes := []byte(g.BinData)
 	var game Game
 	err := json.Unmarshal(bytes, &game)
 	if err != nil {
-		return Game{}
+		return Game{}, err
 	}
-	return game
+	return game, nil
 }
 
-func CreateGame() Game {
+func CreateGame() (Game, error) {
 	game := NewGame()
-	db.Create(game.Marshal())
-	return game
+	state, err := game.Marshal()
+	if err != nil {
+		return Game{}, err
+	}
+	db.Create(state)
+	return game, nil
 }
 
 func GetGame(token uuid.UUID) (Game, error) {
@@ -95,7 +99,11 @@ func GetGame(token uuid.UUID) (Game, error) {
 	if result.RowsAffected == 0 {
 		return Game{}, errors.New("game not found")
 	}
-	return state.Unmarshal(), nil
+	game, err := state.Unmarshal()
+	if err != nil {
+		return Game{}, err
+	}
+	return game, nil
 }
 
 func UpdateGame(token uuid.UUID, guess string) (Result, error) {
@@ -107,7 +115,11 @@ func UpdateGame(token uuid.UUID, guess string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	response := db.Save(game.Marshal())
+	state, err := game.Marshal()
+	if err != nil {
+		return Result{}, err
+	}
+	response := db.Save(state)
 	if response.Error != nil {
 		return Result{}, response.Error
 	}

@@ -11,8 +11,7 @@ func TestMain(t *testing.T) {
 }
 
 func TestCreateGame(t *testing.T) {
-	token := CreateGame().Token
-	_, err := GetGame(token)
+	_, err := CreateGame()
 	if err != nil {
 		t.Error(err)
 	}
