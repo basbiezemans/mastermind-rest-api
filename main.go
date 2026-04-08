@@ -6,6 +6,7 @@ import (
 	"mastermind/web-service/model"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,16 +15,23 @@ import (
 )
 
 func main() {
-	initErrorWriter()
+	log, err := getErrorLog()
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		return
+	}
+	defer log.Close()
+	gin.DefaultErrorWriter = io.Writer(log)
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
-	err := model.ConnectDatabase()
+	err = model.ConnectDatabase()
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 		return
 	}
 	router := newRouter()
-	router.Run()
+	router.Use(gin.Recovery())
+	router.Run(":8080")
 }
 
 func newRouter() *gin.Engine {
@@ -43,7 +51,7 @@ func newGame(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
 			"message": "Game not created",
 		})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusCreated, gin.H{
@@ -66,13 +74,13 @@ func getGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	game, err := model.GetGame(token)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Game not found"})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, game.Info())
@@ -85,7 +93,7 @@ func deleteGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	model.DeleteGame(token)
@@ -99,7 +107,7 @@ func updateGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	guess, ok := c.GetPostForm("guess")
@@ -110,27 +118,32 @@ func updateGameByToken(c *gin.Context) {
 	feedback, err := model.UpdateGame(token, guess)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Server error"})
-		go logError(err.Error())
+		go logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, feedback)
 }
 
-func initErrorWriter() {
+func getErrorLog() (*os.File, error) {
 	flags := os.O_CREATE | os.O_WRONLY | os.O_APPEND
 	file, err := os.OpenFile("data/error.log", flags, 0644)
 	if err != nil {
-		os.Stderr.WriteString(err.Error())
-		return
+		return nil, err
 	}
-	defer file.Close()
-	gin.DefaultErrorWriter = io.MultiWriter(file)
+	return file, nil
 }
 
-func logError(message string) {
+func logError(err error) {
 	t := time.Now()
-	message = fmt.Sprintf("%s | %s\n", t.Format(time.RFC3339), message)
-	_, err := gin.DefaultErrorWriter.Write([]byte(message))
+	// skip=1 to get the caller of this function
+	_, filename, line, _ := runtime.Caller(0)
+	message := fmt.Sprintf("%s | %s:%d | %s\n",
+		t.Format(time.RFC3339),
+		filename,
+		line,
+		err.Error(),
+	)
+	_, err = gin.DefaultErrorWriter.Write([]byte(message))
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 	}
