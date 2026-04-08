@@ -17,7 +17,11 @@ func main() {
 	initErrorWriter()
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
-	model.ConnectDatabase()
+	err := model.ConnectDatabase()
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		return
+	}
 	router := newRouter()
 	router.Run()
 }

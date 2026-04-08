@@ -7,7 +7,10 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	ConnectTestDatabase()
+	err := ConnectTestDatabase()
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestCreateGame(t *testing.T) {

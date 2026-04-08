@@ -19,27 +19,32 @@ type GameState struct {
 
 var db *gorm.DB
 
-func ConnectDatabase() {
-	db = connect("data/mastermind.db")
+func ConnectDatabase() error {
+	var err error
+	db, err = connect("data/mastermind.db")
+	if err != nil {
+		return err
+	}
 	createGameStateIfNotExists([]Game{})
+	return nil
 }
 
-func ConnectTestDatabase() {
+func ConnectTestDatabase() error {
 	dirpath := "data"
 	_, err := os.Stat(dirpath)
 	if os.IsNotExist(err) {
 		dirpath = "../data"
 	}
-	db = connect(dirpath + "/test.db")
+	db, err = connect(dirpath + "/test.db")
+	if err != nil {
+		return err
+	}
 	createGameStateIfNotExists(getTestGames())
+	return nil
 }
 
-func connect(dsn string) *gorm.DB {
-	var conn, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect to the database")
-	}
-	return conn
+func connect(dsn string) (*gorm.DB, error) {
+	return gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 }
 
 // Create a game_states table in case it doesn't exist.
