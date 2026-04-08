@@ -91,7 +91,10 @@ func CreateGame() (Game, error) {
 	if err != nil {
 		return Game{}, err
 	}
-	db.Create(state)
+	result := db.Create(state)
+	if result.Error != nil {
+		return Game{}, result.Error
+	}
 	return game, nil
 }
 
