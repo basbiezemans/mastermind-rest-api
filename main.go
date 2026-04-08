@@ -135,7 +135,7 @@ func getErrorLog() (*os.File, error) {
 
 func logError(err error) {
 	t := time.Now()
-	// skip=1 to get the caller of this function
+	// skip=0 to get the caller of this function
 	_, filename, line, _ := runtime.Caller(0)
 	message := fmt.Sprintf("%s | %s:%d | %s\n",
 		t.Format(time.RFC3339),
