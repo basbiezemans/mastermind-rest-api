@@ -35,11 +35,6 @@ type Feedback struct {
 	Present int
 }
 
-type NumPresent struct {
-	Tally  int
-	Digits []rune
-}
-
 type GameInfo struct {
 	CreatedOn time.Time `json:"created_on"`
 	Token     uuid.UUID `json:"token"`
@@ -87,17 +82,11 @@ func numCorrect(pairs []Pair[rune]) int {
 	return len(pairs) - len(Unequal(pairs))
 }
 
-func count(np NumPresent, r rune) NumPresent {
-	if digits, ok := Remove(r, np.Digits); ok {
-		np.Tally += 1
-		np.Digits = digits
-	}
-	return np
-}
-
 func numPresent(pairs []Pair[rune]) int {
 	secret, guess := UnzipWith(Unpair, pairs)
-	return FoldLeft(count, NumPresent{0, secret}, guess).Tally
+	ms1 := Multiset(guess)
+	ms2 := Multiset(secret)
+	return ms1.Intersection(ms2).Len()
 }
 
 func (f Feedback) String() string {

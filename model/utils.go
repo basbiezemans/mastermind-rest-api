@@ -1,5 +1,7 @@
 package model
 
+import "github.com/aadamandersson/multiset"
+
 type Pair[T any] struct {
 	fst T
 	snd T
@@ -32,6 +34,15 @@ func IsEqual[C comparable](a C) func(C) bool {
 	return func(b C) bool {
 		return a == b
 	}
+}
+
+// Multiset creates a multiset from a slice
+func Multiset[C comparable](xs []C) *multiset.Multiset[C] {
+	ms := multiset.New[C]()
+	for _, x := range xs {
+		ms.Insert(x)
+	}
+	return ms
 }
 
 // Removes the first occurrence of x from its slice argument, if it's present.
