@@ -1,3 +1,5 @@
+github.com/aadamandersson/multiset v0.1.0 h1:h2Q3UEkw/t7Vy1QNUzIcE247FbsIJEwt1Ih88qVCiwg=
+github.com/aadamandersson/multiset v0.1.0/go.mod h1:K8eH2cGx3v2zXc4BNOmXjh9d/443/RweFIdUdY9kpNA=
 github.com/basbiezemans/gofunctools v1.5.2 h1:+S0ZtA9ISgFIT3KkATy6OpxpsRci5L4IXYtIX94nYMM=
 github.com/basbiezemans/gofunctools v1.5.2/go.mod h1:iX69ju6UB3vZkoFk8kkUTGmi7Q5JT8GI5qurOxBLcbE=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
