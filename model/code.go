@@ -3,9 +3,7 @@ package model
 import (
 	"errors"
 	"math/rand"
-	"unicode"
-
-	. "github.com/basbiezemans/gofunctools/funcs"
+	"regexp"
 )
 
 type Secret struct {
@@ -40,16 +38,13 @@ func newCode(code string) Code {
 	}
 }
 
-func isValidDigit(r rune) bool {
-	var valid = []rune("123456")
-	return unicode.IsDigit(r) && Any(IsEqual(r), valid)
+func isValidCode(code string) bool {
+	re := regexp.MustCompile(`^[1-6]{4}$`)
+	return re.MatchString(code)
 }
 
 func CodeFromString(guess string) (Code, error) {
-	var chars = []rune(guess)
-	var isValidLen = len(chars) == 4
-	var isValidGuess = isValidLen && All(isValidDigit, chars)
-	if isValidGuess {
+	if isValidCode(guess) {
 		return newCode(guess), nil
 	}
 	return Code{}, errors.New("invalid guess")
