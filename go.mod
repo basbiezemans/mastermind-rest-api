@@ -3,13 +3,13 @@ module mastermind/web-service
 go 1.24.0
 
 require (
+	github.com/aadamandersson/multiset v0.1.0
 	github.com/basbiezemans/gofunctools v1.5.2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.1
 )
 
 require (
-	github.com/aadamandersson/multiset v0.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
