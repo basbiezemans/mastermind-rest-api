@@ -70,8 +70,8 @@ func NewScore() Score {
 
 // Takes a secret code and a guess, and returns feedback that
 // shows how many digits are correct and/or present in the guess.
-func NewFeedback(secret Code, guess Code) Feedback {
-	var pairs = ZipWith(NewPair, secret.Digits, guess.Digits)
+func NewFeedback(code1 Code, code2 Code) Feedback {
+	var pairs = ZipWith(NewPair, code1.Digits, code2.Digits)
 	return Feedback{
 		Correct: numCorrect(pairs),
 		Present: numPresent(Unequal(pairs)),
