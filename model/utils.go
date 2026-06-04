@@ -38,7 +38,7 @@ func IsEqual[C comparable](a C) func(C) bool {
 
 // Multiset creates a multiset from a slice
 func Multiset[C comparable](xs []C) *multiset.Multiset[C] {
-	ms := multiset.New[C]()
+	var ms = multiset.New[C]()
 	for _, x := range xs {
 		ms.Insert(x)
 	}
