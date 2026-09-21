@@ -2,18 +2,25 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"mastermind/web-service/internal"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(t *testing.T) {
-	internal.ConnectTestDatabase()
+func TestMain(m *testing.M) {
+	if err := internal.ConnectTestDatabase(); err != nil {
+		fmt.Fprintf(os.Stderr, "connect test database: %v\n", err)
+		os.Exit(1)
+	}
+
+	os.Exit(m.Run())
 }
 
 func TestCreateGame(t *testing.T) {

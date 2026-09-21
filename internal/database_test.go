@@ -1,16 +1,20 @@
 package internal
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
 )
 
-func TestMain(t *testing.T) {
-	err := ConnectTestDatabase()
-	if err != nil {
-		t.Error(err)
+func TestMain(m *testing.M) {
+	if err := ConnectTestDatabase(); err != nil {
+		fmt.Fprintf(os.Stderr, "connect test database: %v\n", err)
+		os.Exit(1)
 	}
+
+	os.Exit(m.Run())
 }
 
 func TestCreateGame(t *testing.T) {
