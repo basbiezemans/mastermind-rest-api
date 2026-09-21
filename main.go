@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
-	"mastermind/web-service/model"
+	"mastermind/web-service/internal"
 	"net/http"
 	"os"
 	"runtime"

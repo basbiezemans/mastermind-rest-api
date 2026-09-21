@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"mastermind/web-service/model"
+	"mastermind/web-service/internal"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
