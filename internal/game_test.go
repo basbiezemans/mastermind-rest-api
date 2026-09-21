@@ -21,17 +21,22 @@ func TestUpdateFeedback(t *testing.T) {
 		secret string
 		guess  string
 		expect string
+		descr  string
 	}{
-		{"1234", "1234", "●●●●"},
-		{"6243", "6225", "●●"},
-		{"5256", "2244", "●"},
-		{"1111", "2222", ""},
-		{"6423", "2252", "○"},
-		{"6443", "4124", "○○"},
-		{"6163", "1136", "●○○"},
-		{"1234", "2134", "●●○○"},
+		{"1234", "1234", "●●●●", "all digits correct"},
+		{"6243", "6225", "●●", "two correct positions"},
+		{"5256", "2244", "●", "one correct position"},
+		{"1111", "2222", "", "no matching digits"},
+		{"6423", "2252", "○", "one present digit"},
+		{"6443", "4124", "○○", "two present digits"},
+		{"6163", "1136", "●○○", "one correct and two present digits"},
+		{"1234", "2134", "●●○○", "two correct and two present digits"},
+		{"1234", "2341", "○○○○", "all digits present in wrong positions"},
+		{"1234", "1235", "●●●", "three correct positions"},
+		{"1234", "1256", "●●", "two correct positions and two absent digits"},
 	}
 	for _, test := range tests {
+		game.Turn = 0
 		game.Secret = newCode(test.secret)
 		res, err := game.Update(test.guess)
 		if err != nil {
@@ -39,7 +44,12 @@ func TestUpdateFeedback(t *testing.T) {
 			continue
 		}
 		if test.expect != res.Feedback {
-			t.Errorf("Feedback, expected %s, got %s", test.expect, res.Feedback)
+			t.Errorf(
+				"Feedback: %s, expected %s, got %s",
+				test.descr,
+				test.expect,
+				res.Feedback,
+			)
 		}
 	}
 }
