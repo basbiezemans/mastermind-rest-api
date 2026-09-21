@@ -8,10 +8,24 @@ import (
 )
 
 func TestUpdateInvalidGuess(t *testing.T) {
+	tests := []struct {
+		guess string
+		descr string
+	}{
+		{"", "empty guess"},
+		{"123", "guess too short"},
+		{"12345", "guess too long"},
+		{"0234", "guess contains zero"},
+		{"1237", "guess contains seven"},
+		{"12a4", "guess contains a letter"},
+	}
 	game := MockGame(uuid.UUID{})
-	_, err := game.Update("")
-	if err == nil {
-		t.Errorf("Expected an error, got nil")
+	for _, test := range tests {
+		game.Reset()
+		_, err := game.Update(test.guess)
+		if err == nil {
+			t.Errorf("Update: %s, expected an error, got nil", test.descr)
+		}
 	}
 }
 
