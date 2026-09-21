@@ -1,4 +1,4 @@
-package model
+package internal
 
 import "github.com/aadamandersson/multiset"
 

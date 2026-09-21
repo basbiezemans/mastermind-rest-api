@@ -24,7 +24,7 @@ func main() {
 	gin.DefaultErrorWriter = io.Writer(log)
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
-	err = model.ConnectDatabase()
+	err = internal.ConnectDatabase()
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 		return
@@ -46,7 +46,7 @@ func newRouter() *gin.Engine {
 
 // Create a new game and return a confirmation as response.
 func newGame(c *gin.Context) {
-	game, err := model.CreateGame()
+	game, err := internal.CreateGame()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
 			"message": "Game not created",
@@ -77,7 +77,7 @@ func getGameByToken(c *gin.Context) {
 		go logError(err)
 		return
 	}
-	game, err := model.GetGame(token)
+	game, err := internal.GetGame(token)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Game not found"})
 		go logError(err)
@@ -96,7 +96,7 @@ func deleteGameByToken(c *gin.Context) {
 		go logError(err)
 		return
 	}
-	model.DeleteGame(token)
+	internal.DeleteGame(token)
 	c.IndentedJSON(http.StatusNoContent, nil)
 }
 
@@ -115,7 +115,7 @@ func updateGameByToken(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
-	feedback, err := model.UpdateGame(token, guess)
+	feedback, err := internal.UpdateGame(token, guess)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Server error"})
 		go logError(err)

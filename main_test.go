@@ -13,7 +13,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	model.ConnectTestDatabase()
+	internal.ConnectTestDatabase()
 }
 
 func TestCreateGame(t *testing.T) {
