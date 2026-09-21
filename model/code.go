@@ -39,9 +39,9 @@ func isValidCode(code string) bool {
 	return re.MatchString(code)
 }
 
-func CodeFromString(guess string) (Code, error) {
-	if isValidCode(guess) {
-		return newCode(guess), nil
+func CodeFromString(code string) (Code, error) {
+	if isValidCode(code) {
+		return newCode(code), nil
 	}
 	return Code{}, errors.New("invalid guess")
 }
