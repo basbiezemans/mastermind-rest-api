@@ -58,8 +58,8 @@ func TestUpdateGameTurnCount(t *testing.T) {
 	secret := game.Secret
 	var k, n uint8 = 0, 3
 	for k < n {
-		guess := NewSecret().Code.String()
-		if guess != secret.Code.String() {
+		guess := RandomCode().String()
+		if guess != secret.String() {
 			_, err = UpdateGame(game.Token, guess)
 			if err != nil {
 				t.Fatal(err)

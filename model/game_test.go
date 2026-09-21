@@ -32,7 +32,7 @@ func TestUpdateFeedback(t *testing.T) {
 		{"1234", "2134", "●●○○"},
 	}
 	for _, test := range tests {
-		game.Secret = Secret{newCode(test.secret)}
+		game.Secret = newCode(test.secret)
 		res, err := game.Update(test.guess)
 		if err != nil {
 			t.Errorf("Error: %s", err.Error())

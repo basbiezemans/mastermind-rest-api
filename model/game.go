@@ -15,7 +15,7 @@ type Game struct {
 	Token     uuid.UUID `json:"token"`
 	Score     Score     `json:"score"`
 	Turn      uint8     `json:"game_turn"`
-	Secret    Secret    `json:"secret_code"`
+	Secret    Code      `json:"secret_code"`
 }
 
 type Score struct {
@@ -47,7 +47,7 @@ func NewGame() Game {
 		CreatedOn: time.Now(),
 		Turn:      0,
 		Score:     NewScore(),
-		Secret:    NewSecret(),
+		Secret:    RandomCode(),
 	}
 }
 
@@ -57,7 +57,7 @@ func MockGame(token uuid.UUID) Game {
 		CreatedOn: time.Now(),
 		Turn:      0,
 		Score:     NewScore(),
-		Secret:    Secret{Code: newCode("1234")},
+		Secret:    newCode("1234"),
 	}
 }
 
@@ -99,7 +99,7 @@ func (g *Game) Update(guess string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	feedback := NewFeedback(g.Secret.Code, code)
+	feedback := NewFeedback(g.Secret, code)
 	// Increment turn count
 	g.Turn += 1
 	// Award a point if applicable
@@ -129,7 +129,7 @@ func (g *Game) Update(guess string) (Result, error) {
 // Reset the game
 func (g *Game) Reset() {
 	g.Turn = 0
-	g.Secret = NewSecret()
+	g.Secret = RandomCode()
 }
 
 func (g *Game) Info() GameInfo {

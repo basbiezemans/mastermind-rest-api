@@ -6,10 +6,6 @@ import (
 	"regexp"
 )
 
-type Secret struct {
-	Code Code `json:"code"`
-}
-
 type Code struct {
 	Digits []rune `json:"digits"`
 }
@@ -18,7 +14,7 @@ func (c Code) String() string {
 	return string(c.Digits)
 }
 
-func NewSecret() Secret {
+func RandomCode() Code {
 	var digits = make([]rune, 4)
 	var valid = []rune("123456")
 	// The below rand.Perm returns, as a slice of 6 ints, a pseudo-random
@@ -29,7 +25,7 @@ func NewSecret() Secret {
 	for i, r := range rs {
 		digits[i] = valid[r]
 	}
-	return Secret{Code{digits}}
+	return Code{digits}
 }
 
 func newCode(code string) Code {

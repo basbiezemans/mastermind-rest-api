@@ -6,11 +6,11 @@ import (
 )
 
 func TestNewSecret(t *testing.T) {
-	var secret Secret
+	var secret Code
 	for i, n := 0, 10; i < n; i++ {
-		secret = NewSecret()
-		if !isValidCode(secret.Code.String()) {
-			t.Errorf("invalid secret code: %s", secret.Code.String())
+		secret = RandomCode()
+		if !isValidCode(secret.String()) {
+			t.Errorf("invalid secret code: %s", secret.String())
 		}
 	}
 }
