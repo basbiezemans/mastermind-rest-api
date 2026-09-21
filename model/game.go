@@ -78,11 +78,11 @@ func NewFeedback(code1 Code, code2 Code) Feedback {
 	}
 }
 
-func numCorrect(pairs []Pair[rune]) int {
+func numCorrect[C comparable](pairs []Pair[C]) int {
 	return len(pairs) - len(Unequal(pairs))
 }
 
-func numPresent(pairs []Pair[rune]) int {
+func numPresent[C comparable](pairs []Pair[C]) int {
 	secret, guess := UnzipWith(Unpair, pairs)
 	ms1 := Multiset(guess)
 	ms2 := Multiset(secret)
