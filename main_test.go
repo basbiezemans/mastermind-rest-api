@@ -19,7 +19,6 @@ func TestMain(m *testing.M) {
 		fmt.Fprintf(os.Stderr, "connect test database: %v\n", err)
 		os.Exit(1)
 	}
-
 	os.Exit(m.Run())
 }
 
