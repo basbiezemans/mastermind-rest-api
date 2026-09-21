@@ -93,16 +93,16 @@ func TestUpdateGameFailure(t *testing.T) {
 
 func TestDeleteGameSuccess(t *testing.T) {
 	token := "20d245fd-f724-4e1c-a818-04b3dd33ef5d"
-	isDeleted := DeleteGame(uuid.MustParse(token))
-	if !isDeleted {
+	numRows := DeleteGame(uuid.MustParse(token))
+	if numRows == 0 {
 		t.Error("expected game to be deleted")
 	}
 }
 
 func TestDeleteGameFailure(t *testing.T) {
 	token := "11111111-2222-3333-4444-555555555555"
-	isDeleted := DeleteGame(uuid.MustParse(token))
-	if isDeleted {
+	numRows := DeleteGame(uuid.MustParse(token))
+	if numRows != 0 {
 		t.Error("expected game NOT to be deleted")
 	}
 }

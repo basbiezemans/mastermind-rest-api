@@ -99,8 +99,12 @@ func deleteGameByToken(c *gin.Context) {
 		go logError(err)
 		return
 	}
-	internal.DeleteGame(token)
-	c.IndentedJSON(http.StatusNoContent, nil)
+	numRows := internal.DeleteGame(token)
+	if numRows == 0 {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Game not found"})
+	} else {
+		c.IndentedJSON(http.StatusNoContent, nil)
+	}
 }
 
 // Locate a game whose Token value matches the token

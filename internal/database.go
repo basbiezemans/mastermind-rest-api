@@ -134,6 +134,6 @@ func UpdateGame(token uuid.UUID, guess string) (Result, error) {
 	return result, nil
 }
 
-func DeleteGame(token uuid.UUID) bool {
-	return db.Delete(GameState{}, token).RowsAffected > 0
+func DeleteGame(token uuid.UUID) int64 {
+	return db.Delete(GameState{}, token).RowsAffected
 }
