@@ -23,3 +23,8 @@ go.work
 # All files in the data folder except README.md
 data/*
 !data/README.md
+
+# Backup copies of files
+*.old
+*.bak
+*.orig
