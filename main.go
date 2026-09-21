@@ -24,10 +24,10 @@ func main() {
 	gin.DefaultErrorWriter = io.Writer(log)
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
-	err = internal.ConnectDatabase()
-	if err != nil {
+	if err = internal.ConnectDatabase(); err != nil {
 		os.Stderr.WriteString(err.Error())
-		return
+		logError(err)
+		os.Exit(1)
 	}
 	router := newRouter()
 	router.Use(gin.Recovery())
