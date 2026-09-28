@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/aadamandersson/multiset v0.1.0
-	github.com/basbiezemans/gofunctools v1.5.2
+	github.com/basbiezemans/gofunctools v1.6.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.1
 )
