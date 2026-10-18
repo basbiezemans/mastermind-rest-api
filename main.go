@@ -30,7 +30,6 @@ func main() {
 		os.Exit(1)
 	}
 	router := newRouter()
-	router.Use(gin.Recovery())
 	if err := router.Run(":8080"); err != nil {
 		logError(err)
 		os.Exit(1)
