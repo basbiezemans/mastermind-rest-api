@@ -7,36 +7,56 @@ import (
 	"mastermind/web-service/internal"
 	"net/http"
 	"os"
-	"runtime"
-	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
 
+var errorLogger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
+
 func main() {
-	logFile, err := getErrorLog()
-	if err != nil {
-		log.Fatal("Failed to create log file: ", err)
-	}
-	defer logFile.Close()
-	gin.DefaultErrorWriter = io.Writer(logFile)
-	// gin.SetMode(gin.ReleaseMode)
-	gin.SetMode(gin.DebugMode)
-	if err := internal.ConnectDatabase(); err != nil {
-		logError(err)
-		log.Fatal("Failed to connect to database: ", err)
-	}
-	router := newRouter()
-	if err := router.Run(":8080"); err != nil {
-		logError(err)
-		log.Fatal("Failed to start HTTP server: ", err)
+	if err := run(); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func newRouter() *gin.Engine {
-	router := gin.Default()
+func run() error {
+	errorLog, err := getErrorLog()
+	if err != nil {
+		return fmt.Errorf("create error log: %w", err)
+	}
+	defer errorLog.Close()
+
+	accessLog, err := getAccessLog()
+	if err != nil {
+		return fmt.Errorf("create access log: %w", err)
+	}
+	defer accessLog.Close()
+
+	errorLogger.SetOutput(errorLog)
+	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
+
+	if err := internal.ConnectDatabase(); err != nil {
+		logError(err)
+		return fmt.Errorf("connect to database: %w", err)
+	}
+
+	router := newRouter(accessLog, errorLog)
+	if err := router.Run(":8080"); err != nil {
+		logError(err)
+		return fmt.Errorf("start HTTP server: %w", err)
+	}
+	return nil
+}
+
+func newRouter(accessWriter, errorWriter io.Writer) *gin.Engine {
+	router := gin.New()
+	router.Use(
+		gin.LoggerWithWriter(accessWriter),  // access logs
+		gin.RecoveryWithWriter(errorWriter), // panic/recovery logs
+	)
 	router.POST("/create", newGame)
 	router.GET("/", getEndpointInfo)
 	router.GET("/games/:token", getGameByToken)
@@ -131,25 +151,20 @@ func updateGameByToken(c *gin.Context) {
 
 func getErrorLog() (*os.File, error) {
 	flags := os.O_CREATE | os.O_WRONLY | os.O_APPEND
-	file, err := os.OpenFile("data/error.log", flags, 0644)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
+	return os.OpenFile("data/error.log", flags, 0644)
+}
+
+func getAccessLog() (*os.File, error) {
+	flags := os.O_CREATE | os.O_WRONLY | os.O_APPEND
+	return os.OpenFile("data/access.log", flags, 0644)
 }
 
 func logError(err error) {
-	t := time.Now()
-	// skip=0 to get the caller of this function
-	_, filename, line, _ := runtime.Caller(0)
-	message := fmt.Sprintf("%s | %s:%d | %s\n",
-		t.Format(time.RFC3339),
-		filename,
-		line,
-		err.Error(),
-	)
-	_, err = gin.DefaultErrorWriter.Write([]byte(message))
-	if err != nil {
-		os.Stderr.WriteString(err.Error())
+	if err == nil {
+		return
+	}
+	// Output(2, ...) identifies the caller of this function
+	if writeErr := errorLogger.Output(2, err.Error()); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "failed to write error log: %v (original error: %v)\n", writeErr, err)
 	}
 }
