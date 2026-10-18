@@ -52,7 +52,7 @@ func newGame(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
 			"message": "Game not created",
 		})
-		go logError(err)
+		logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusCreated, gin.H{
@@ -75,13 +75,13 @@ func getGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err)
+		logError(err)
 		return
 	}
 	game, err := internal.GetGame(token)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Game not found"})
-		go logError(err)
+		logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, game.Info())
@@ -94,7 +94,7 @@ func deleteGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err)
+		logError(err)
 		return
 	}
 	numRows := internal.DeleteGame(token)
@@ -112,7 +112,7 @@ func updateGameByToken(c *gin.Context) {
 	token, err := uuid.Parse(c.Param("token"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
-		go logError(err)
+		logError(err)
 		return
 	}
 	guess, ok := c.GetPostForm("guess")
@@ -123,7 +123,7 @@ func updateGameByToken(c *gin.Context) {
 	feedback, err := internal.UpdateGame(token, guess)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Server error"})
-		go logError(err)
+		logError(err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, feedback)
