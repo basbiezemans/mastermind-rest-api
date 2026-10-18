@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"mastermind/web-service/internal"
 	"net/http"
 	"os"
@@ -15,24 +16,22 @@ import (
 )
 
 func main() {
-	log, err := getErrorLog()
+	logFile, err := getErrorLog()
 	if err != nil {
-		os.Stderr.WriteString(err.Error())
-		return
+		log.Fatal("Failed to create log file: ", err)
 	}
-	defer log.Close()
-	gin.DefaultErrorWriter = io.Writer(log)
+	defer logFile.Close()
+	gin.DefaultErrorWriter = io.Writer(logFile)
 	// gin.SetMode(gin.ReleaseMode)
 	gin.SetMode(gin.DebugMode)
-	if err = internal.ConnectDatabase(); err != nil {
-		os.Stderr.WriteString(err.Error())
+	if err := internal.ConnectDatabase(); err != nil {
 		logError(err)
-		os.Exit(1)
+		log.Fatal("Failed to connect to database: ", err)
 	}
 	router := newRouter()
 	if err := router.Run(":8080"); err != nil {
 		logError(err)
-		os.Exit(1)
+		log.Fatal("Failed to start HTTP server: ", err)
 	}
 }
 
